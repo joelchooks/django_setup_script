@@ -1,7 +1,35 @@
-<#
-.DESCRIPTION
-This script is written to make for ease in setting up a django project and getting it ready for development.
+
+<#PSScriptInfo
+
+.VERSION 1.0
+
+.GUID 35ba7b15-7138-4eb7-bd11-8faebb018fe2
+
+.AUTHOR 
+Chukwuemeka Nwaoma
+
+
+.COPYRIGHT 
+Look me up on LinkedIn at https://www.linkedin.com/in/joelchukks/
+
+
+.PROJECTURI 
+https://github.com/joelchooks/django_setup_script
+
+
+.RELEASENOTES
+Thanks for running this script. Hope you love it.
+
 #>
+
+<# 
+
+.DESCRIPTION 
+ This script is written to make for ease in setting up a django project and getting it ready for development. 
+
+#> 
+
+Param()
 
 
 # Collect Mandatory Folder Name Input
@@ -113,12 +141,7 @@ function run_script {
 
     Write-Output "Writing to views"
     $viewscontent = Get-Content views.py
-
-    if ($new_wkdir_folder -eq 'y'){
-        $viewsPath = Join-Path $PSScriptRoot $folder_name\$app_name\views.py
-    } else{
-        $viewsPath = Join-Path $PSScriptRoot $folder_name\$project_name\$app_name\views.py
-    }
+    $viewsPath = '.\views.py'
 
     $ViewsModified = @()
     Foreach ($Line in $viewscontent){
@@ -207,12 +230,7 @@ function run_script {
     Set-Location .\$project_name
 
     $urlcontent = Get-Content urls.py
-
-    if ($new_wkdir_folder -eq 'y'){
-        $urlPath = Join-Path $PSScriptRoot $folder_name\$project_name\urls.py
-    } else{
-        $urlPath = Join-Path $PSScriptRoot $folder_name\$project_name\$project_name\urls.py
-    }
+    $urlPath = '.\urls.py'
 
     $UrlsModified = @()
     Foreach ($Line in $urlcontent){
@@ -296,12 +314,7 @@ function run_script {
     }
 
     $settingscontent = Get-Content settings.py
-
-    if ($new_wkdir_folder -eq 'y'){
-        $settingsPath = Join-Path $PSScriptRoot $folder_name\$project_name\settings.py
-    } else{
-        $settingsPath = Join-Path $PSScriptRoot $folder_name\$project_name\$project_name\settings.py
-    }
+    $settingsPath = '.\settings.py'
 
     $SettingsModified = @()
     Foreach ($Line in $settingscontent){
@@ -419,8 +432,7 @@ function run_script {
     Set-Location .\'dbbackup'
 
     $backupcontent = Get-Content apps.py
-
-    $backupPath = Join-Path $PSScriptRoot $folder_name\venv\Lib\site-packages\dbbackup\apps.py
+    $backupPath = '.\apps.py'
 
     $backupModified = @()
     Foreach ($Line in $backupcontent){
@@ -438,16 +450,16 @@ function run_script {
 
     Write-Output "Making Migrations"
     if ($new_wkdir_folder -eq 'y'){
-        $ParDir = Join-Path $PSScriptRoot $folder_name
+        $ParDir = "..\..\..\..\"
     } else{
-        $ParDir = Join-Path $PSScriptRoot $folder_name\$project_name
+        $ParDir = "..\..\..\..\$project_name"
     }
 
     Set-Location $ParDir
 
     Try{
         python manage.py makemigrations
-        Write-Output "Finishing Off and Starting Server"
+        Write-Output "Finishing Off"
     }
     Catch{
         Write-Output "An Error Occured"
@@ -455,6 +467,10 @@ function run_script {
     Finally{
         python manage.py migrate
         Write-Output " "
+        $create_super = Read-Host -Prompt "Would you like to create a super user? [y] yes  [n] no (default is 'no')"
+        if ($create_super -eq 'y'){
+            python manage.py createsuperuser
+        }
         Write-Output "Thank you for running this script to start your Django App. Goodluck"
         Write-Output "DO NOT FORGET TO CREATE A .env FILE AND COPY THE EVERYTHING FROM example.env TO IT, THEN RUN 'python manage.py runsever' TO START SERVER"
         Write-Output " "
@@ -469,7 +485,7 @@ if (Test-Path -Path $folder_root) {
     "Folder exists!"
 
     # Continue for existing folder
-    $folder_exists = Read-Host -Prompt "If you want to continue with existing path. [Y] Yes  [N] No (default is 'No')"
+    $folder_exists = Read-Host -Prompt "If you want to continue with existing path. [y] yes  [n] no (default is 'no')"
     if ($folder_exists -eq 'y'){
         change_wkdir
         run_script
